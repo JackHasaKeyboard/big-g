@@ -28,14 +28,6 @@ def alert(msg, size, pos):
 
     disp.blit(cont, pos)
 
-# background
-disp.fill((255, 255, 255))
-
-for alvl in lvls:
-    alert(str(alvl), 20, [bounds[0] / 2 + margin, bounds[1] / 2])
-
-disp.fill((255, 255, 255))
-
 # prop
 start = {
         'x': 100,
