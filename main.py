@@ -192,14 +192,12 @@ def play():
                 del target_candidates[:]
 
                 if event.key == pygame.K_RIGHT:
-                    deg = 90
-
                     for box in boxes[lvl]:
                         if box['y'] == pos['y']:
                             target_candidates.append(box)
 
                     target = target_candidates[0]
-                    rotate(deg)
+                    rotate(90)
 
                     if pos['y'] == target['y'] and pos['x'] < target['x']:
                         pos['x'] = target['x'] - size
@@ -208,14 +206,12 @@ def play():
                         pos['x'] = bounds[0] + size
 
                 if event.key == pygame.K_LEFT:
-                    deg = 270
-
                     for box in boxes[lvl]:
                         if box['y'] == pos['y']:
                             target_candidates.append(box)
 
                     target = target_candidates[0]
-                    rotate(deg)
+                    rotate(270)
 
                     if pos['y'] == target['y'] and pos['x'] > target['x']:
                         pos['x'] = target['x'] + size
@@ -224,14 +220,12 @@ def play():
                         pos['x'] = -size
 
                 if event.key == pygame.K_UP:
-                    deg = 180
-
                     for box in boxes[lvl]:
                         if box['x'] == pos['x']:
                             target_candidates.append(box)
 
                     target = target_candidates[0]
-                    rotate(deg)
+                    rotate(180)
 
                     if pos['x'] == target['x'] and pos['y'] > target['y']:
                         pos['y'] = target['y'] + size
@@ -240,14 +234,12 @@ def play():
                         pos['y'] = bounds[0] - size
 
                 if event.key == pygame.K_DOWN:
-                    deg = 0
-
                     for box in boxes[lvl]:
                         if box['x'] == pos['x']:
                             target_candidates.append(box)
 
                     target = target_candidates[0]
-                    rotate(deg)
+                    rotate(0)
 
                     if pos['x'] == target['x'] and pos['y'] < target['y']:
                         pos['y'] = target['y'] - size
