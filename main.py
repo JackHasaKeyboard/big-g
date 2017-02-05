@@ -44,67 +44,67 @@ def select_lvl(i):
 
 # prop
 start = {
-        'x': 100,
-        'y': 50
+        'x': 2,
+        'y': 1
         }
 
 boxes = [
         [
             {
-                'x': 50,
-                'y': 300
+                'x': 1,
+                'y': 6
                 }, {
-                    'x': 350,
-                    'y': 300
+                    'x': 7,
+                    'y': 6
                     }, {
-                        'x': 400,
-                        'y': 50
+                        'x': 8,
+                        'y': 1
                         }, {
-                            'x': 600,
+                            'x': 12,
                             'y': 0
                             }, {
-                                'x': 50,
-                                'y': 250
+                                'x': 1,
+                                'y': 5
                                 }, {
-                                    'x': 100,
-                                    'y': 100
+                                    'x': 2,
+                                    'y': 2
                                     }
                                 ], [
                                     {
-                                        'x': 200,
-                                        'y': 400
+                                        'x': 4,
+                                        'y': 8
                                         }, {
-                                            'x': 250,
-                                            'y': 300
+                                            'x': 5,
+                                            'y': 6
                                             }, {
-                                                'x': 600,
-                                                'y': 200
+                                                'x': 12,
+                                                'y': 4
                                                 }, {
-                                                    'x': 200,
-                                                    'y': 100
+                                                    'x': 4,
+                                                    'y': 2
                                                     }, {
-                                                        'x': 50,
-                                                        'y': 250
+                                                        'x': 1,
+                                                        'y': 5
                                                         }, {
-                                                            'x': 100,
-                                                            'y': 100
+                                                            'x': 2,
+                                                            'y': 2
                                                             }
                                                         ]
                                 ]
 
 stars = [
         {
-            'x': 400,
-            'y': 400
+            'x': 8,
+            'y': 8
             }, {
-                'x': 500,
-                'y': 500
+                'x': 10,
+                'y': 10
                 }
             ]
 
 goal = {
-        'x': 100,
-        'y': 150
+        'x': 2,
+        'y': 3
         }
 
 margin = 0
@@ -176,15 +176,15 @@ def play():
         disp.fill((255, 255, 255))
 
         # prop
-        screen.blit(player, (start['x'], start['y']))
+        screen.blit(player, (pos['x'] * size, pos['y'] * size))
 
         for box in boxes[lvl]:
-            pygame.draw.rect(disp, (000, 000, 000), [box['x'], box['y'], size, size])
+            pygame.draw.rect(disp, (000, 000, 000), [box['x'] * size, box['y'] * size, size, size])
 
         for star in stars:
-            pygame.draw.rect(disp, (255, 215, 000), [star['x'], star['y'], size, size])
+            pygame.draw.rect(disp, (255, 215, 000), [star['x'] * size, star['y'] * size, size, size])
 
-        pygame.draw.rect(disp, (255, 0, 0), [goal['x'], goal['y'], size, size])
+        pygame.draw.rect(disp, (255, 0, 0), [goal['x'] * size, goal['y'] * size, size, size])
 
         # input
         for event in pygame.event.get():
@@ -200,10 +200,10 @@ def play():
                     rotate(90)
 
                     if pos['y'] == target['y'] and pos['x'] < target['x']:
-                        pos['x'] = target['x'] - size
+                        pos['x'] = target['x'] - 1
 
                     else:
-                        pos['x'] = bounds[0] + size
+                        pos['x'] = bounds[0] + 1
 
                 if event.key == pygame.K_LEFT:
                     for box in boxes[lvl]:
@@ -214,10 +214,10 @@ def play():
                     rotate(270)
 
                     if pos['y'] == target['y'] and pos['x'] > target['x']:
-                        pos['x'] = target['x'] + size
+                        pos['x'] = target['x'] + 1
 
                     else:
-                        pos['x'] = -size
+                        pos['x'] = -1
 
                 if event.key == pygame.K_UP:
                     for box in boxes[lvl]:
@@ -228,10 +228,10 @@ def play():
                     rotate(180)
 
                     if pos['x'] == target['x'] and pos['y'] > target['y']:
-                        pos['y'] = target['y'] + size
+                        pos['y'] = target['y'] + 1
 
                     else:
-                        pos['y'] = bounds[0] - size
+                        pos['y'] = bounds[0] - 1
 
                 if event.key == pygame.K_DOWN:
                     for box in boxes[lvl]:
