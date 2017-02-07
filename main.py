@@ -43,30 +43,30 @@ def select_lvl(i):
 prop = [
         {
             'start': {
-                'x': 1,
-                'y': 2
+                'x': 6,
+                'y': 3
                 },
             'boxes': [
                 {
-                    'x': 4,
+                    'x': 0,
                     'y': 2
                     }, {
-                    'x': 3,
-                    'y': 6
-                    }, {
-                        'x': 1,
-                        'y': 5
-                        }
-                ],
+                        'x': 8,
+                        'y': 7
+                        }, {
+                            'x': 6,
+                            'y': 6
+                            }
+                        ],
             'stars': [
                 {
-                    'x': 1,
-                    'y': 4
+                    'x': 6,
+                    'y': 5
                     }
                 ],
             'goal': {
-                'x': 2,
-                'y': 5
+                'x': 8,
+                'y': 6
                 }
             }, {
                 'start': {
@@ -208,56 +208,72 @@ def play():
                         if box['y'] == pos['y']:
                             target_candidates.append(box)
 
-                    target = target_candidates[0]
-                    rotate(90)
+                    if target_candidates[0] != None:
+                        target = target_candidates[0]
+                        rotate(90)
 
-                    if pos['y'] == target['y'] and pos['x'] < target['x']:
-                        pos['x'] = target['x'] - 1
+                        if pos['y'] == target['y'] and pos['x'] < target['x']:
+                            pos['x'] = target['x'] - 1
+
+                        else:
+                            pos['x'] = bounds[0] + 1
 
                     else:
-                        pos['x'] = bounds[0] + 1
+                        menu()
 
                 if event.key == pygame.K_LEFT:
                     for box in prop[lvl]['boxes']:
                         if box['y'] == pos['y']:
                             target_candidates.append(box)
 
-                    target = target_candidates[0]
-                    rotate(270)
+                    if target_candidates[0] != None:
+                        target = target_candidates[0]
+                        rotate(270)
 
-                    if pos['y'] == target['y'] and pos['x'] > target['x']:
-                        pos['x'] = target['x'] + 1
+                        if pos['y'] == target['y'] and pos['x'] > target['x']:
+                            pos['x'] = target['x'] + 1
+
+                        else:
+                            pos['x'] = -1
 
                     else:
-                        pos['x'] = -1
+                        menu()
 
                 if event.key == pygame.K_UP:
                     for box in prop[lvl]['boxes']:
                         if box['x'] == pos['x']:
                             target_candidates.append(box)
 
-                    target = target_candidates[0]
-                    rotate(180)
+                    if target_candidates[0] != None:
+                        target = target_candidates[0]
+                        rotate(180)
 
-                    if pos['x'] == target['x'] and pos['y'] > target['y']:
-                        pos['y'] = target['y'] + 1
+                        if pos['x'] == target['x'] and pos['y'] > target['y']:
+                            pos['y'] = target['y'] + 1
+
+                        else:
+                            pos['y'] = bounds[0] - 1
 
                     else:
-                        pos['y'] = bounds[0] - 1
+                        menu()
 
                 if event.key == pygame.K_DOWN:
                     for box in prop[lvl]['boxes']:
                         if box['x'] == pos['x']:
                             target_candidates.append(box)
 
-                    target = target_candidates[0]
-                    rotate(0)
+                    if target_candidates[0] != None:
+                        target = target_candidates[0]
+                        rotate(0)
 
-                    if pos['x'] == target['x'] and pos['y'] < target['y']:
-                        pos['y'] = target['y'] - 1
+                        if pos['x'] == target['x'] and pos['y'] < target['y']:
+                            pos['y'] = target['y'] - 1
+
+                        else:
+                            pos['y'] = bounds[0] + 1
 
                     else:
-                        pos['y'] = bounds[0] + 1
+                        menu()
 
                 if event.key == pygame.K_ESCAPE:
                     menu()
