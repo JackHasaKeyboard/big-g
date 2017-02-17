@@ -33,7 +33,13 @@ pos = [0, 0]
 running = True
 
 prop = {
-        'start': [-1, -1],
+        'start': {
+            'pos': [
+                -1,
+                -1
+                ],
+            'rot': 0
+            },
         'boxes': [],
         'stars': [],
         'goal': [-1, -1]
@@ -55,16 +61,16 @@ while running:
                 pos[1] += 1
 
             if event.key == pygame.K_p:
-                prop['start'] = [pos[0], pos[1]]
+                prop['start']['pos'] = pos[:]
 
             if event.key == pygame.K_s:
-                prop['stars'].append([pos[0], pos[1]])
+                prop['stars'].append(pos[:])
 
             if event.key == pygame.K_b:
-                prop['boxes'].append([pos[0], pos[1]])
+                prop['boxes'].append(pos[:])
 
             if event.key == pygame.K_g:
-                prop['goal'] = [pos[0], pos[1]]
+                prop['goal'] = pos[:]
 
             # clear
             if event.key == pygame.K_c:
@@ -98,7 +104,7 @@ while running:
 
         margin += 50
 
-    screen.blit(player, (prop['start'][0] * size, prop['start'][1] * size))
+    screen.blit(player, (prop['start']['pos'][0] * size, prop['start']['pos'][1] * size))
 
     for box in prop['boxes']:
         pygame.draw.rect(disp, (000, 000, 000), [box[0] * size, box[1] * size, size, size])
