@@ -1,4 +1,8 @@
 import pygame
+import time
+import importlib
+import os
+import glob
 
 # pygame fundamentals
 pygame.init()
@@ -11,7 +15,7 @@ pygame.display.set_caption('Gravity Guy!')
 
 size = 50
 
-# player
+# bob
 player_img = pygame.image.load('img/aldrin.jpg')
 player = pygame.transform.scale(player_img, (size, size))
 
@@ -31,126 +35,48 @@ def get_txt_center(msg):
     return cont.get_rect()
 
 # lvl
-i = 0
+lvl = 0
+lvls = range(len(glob.glob('lvl/*.py')))
 
 def select_lvl(i):
     global lvl
 
-    if lvl + i >= 0 and lvl + i < lvls:
+    if lvl + i in lvls:
         lvl += i
 
-# prop
-prop = [
-        {
-            'start': {
-                'x': 5,
-                'y': 4
-                },
-            'boxes': [
-                {
-                    'x': 9,
-                    'y': 4
-                    },
-                {
-                    'x': 8,
-                    'y': 7
-                    },
-                {
-                    'x': 6,
-                    'y': 6
-                    }
-                ],
-            'stars': [
-                ],
-            'goal': {
-                'x': 8,
-                'y': 6
-                }
-            }, {
-                'start': {
-                    'x': 7,
-                    'y': 4
-                    },
-                'boxes': [
-                    {
-                        'x': 7,
-                        'y': 5
-                        },
-                    {
-                            'x': 7,
-                            'y': 1
-                            },
-                    {
-                                'x': 10,
-                                'y': 2
-                                },
-                    {
-                                    'x': 9,
-                                    'y': 6
-                                    },
-                    {
-                                        'x': 2,
-                                        'y': 4
-                                        },
-                    {
-                                            'x': 2,
-                                            'y': 4
-                                            },
-                    {
-                                                'x': 3,
-                                                'y': 7
-                                                }
-                                            ],
-                'stars': [
-                    {
-                        'x': 3,
-                        'y': 4
-                        }
-                    ],
-                'goal': {
-                    'x': 8,
-                    'y': 5
-                    }
-                }, {
-                        'start': {
-                            'x': 7,
-                            'y': 3
-                            },
-                        'boxes': [
-                            {
-                                'x': 1,
-                                'y': 4
-                                },
-                            {
-                                    'x': 4,
-                                    'y': 7
-                                    }
-                                ],
-                        'stars': [
-                            {
-                                'x': 1,
-                                'y': 4
-                                }
-                            ],
-                        'goal': {
-                            'x': 4,
-                            'y': 2
-                            }
-                        }
+module = importlib.import_module('lvl.%d' % lvl)
 
-                ]
-
-lvl = 0
-lvls = len(prop)
-
-margin = 0
+prop = module.prop
 
 def splash():
-    global lvl, margin
+    global lvl, prop
 
     splash = True
 
     while splash:
+        disp.fill((255, 255, 255))
+
+        alert('Gravity Guy!', 100, [bounds[0] / 2 - get_txt_center('Gravity Guy!')[2], bounds[1] / 2 - 100], (000, 000, 000))
+
+        margin = [0, 0]
+
+        for i in lvls:
+            margin[0] += size
+
+            if i % 6 == 0:
+                margin[0] = bounds[0] / 2 - 6 * size / 2
+                margin[1] += size
+
+            if i == lvl:
+                pygame.draw.rect(disp, (000, 000, 000), [margin[0], bounds[1] / 2 + margin[1], size, size])
+
+                color = (255, 255, 255)
+
+            else:
+                color = (000, 000, 000)
+
+            alert(str(i), 30, [margin[0] + size / 2 - get_txt_center(str(i))[2] / 2, bounds[1] / 2 - 10 + size / 2 + margin[1]], color)
+
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RIGHT:
@@ -166,26 +92,11 @@ def splash():
                     select_lvl(-6)
 
                 if event.key == pygame.K_RETURN:
-                    play()
+                    module = importlib.import_module('lvl.%d' % lvl)
 
-        margin = 0
+                    prop = module.prop
 
-        disp.fill((255, 255, 255))
-
-        alert('Gravity Guy!', 100, [bounds[0] / 2 - get_txt_center('Gravity Guy!')[2], bounds[1] / 2 - 100], (000, 000, 000))
-
-        for i in range(len(prop)):
-            margin += 80
-
-            if i == lvl:
-                pygame.draw.rect(disp, (000, 000, 000), [margin, bounds[1] / 2, size, size])
-
-                color = (255, 255, 255)
-
-            else:
-                color = (000, 000, 000)
-
-            alert(str(i), 30, [size / 2 + margin - 5, bounds[1] / 2 - 10 + size / 2], color)
+                    play('restart')
 
         pygame.display.update()
 
@@ -200,29 +111,94 @@ def rotate(deg):
 
     prev_rot = deg
 
-def play():
-    global player, running, prev_rot, success
+pos = prop['start']['pos'][:]
 
-    splash = False
-    show_menu = False
-    success = False
+def find_target(dir):
+    global target, target_candidates
+
+    if dir == 'up':
+        for box in prop['boxes']:
+            if box[0] == pos[0] and box[1] < pos[1]:
+                target_candidates.append(box)
+
+        sorted(target_candidates)
+
+        if target_candidates:
+            target = target_candidates[-1]
+
+        else:
+            end = True
+            success = False
+            menu()
+
+    if dir == 'down':
+        for box in prop['boxes']:
+            if box[0] == pos[0] and box[1] > pos[1]:
+                target_candidates.append(box)
+
+        sorted(target_candidates)
+
+        if target_candidates:
+            target = target_candidates[0]
+
+        else:
+            end = True
+            success = False
+            menu()
+
+    if dir == 'left':
+        for box in prop['boxes']:
+            if box[1] == pos[1] and box[0] < pos[0]:
+                target_candidates.append(box)
+
+        sorted(target_candidates)
+
+        if target_candidates:
+            target = target_candidates[0]
+
+        else:
+            end = True
+            success = False
+            menu()
+
+    if dir == 'right':
+        for box in prop['boxes']:
+            if box[1] == pos[1] and box[0] > pos[0]:
+                target_candidates.append(box)
+
+        sorted(target_candidates)
+
+        if target_candidates:
+            target = target_candidates[-1]
+
+        else:
+            end = True
+            success = False
+            menu()
+
+def play(status):
+    global prev_rot, success, end, pos
+
     running = True
+    end = False
 
-    pos = prop[lvl]['start']
+    if status == 'restart':
+        rotate(prop['start']['rot'])
+        pos = prop['start']['pos'][:]
 
     while running:
         disp.fill((255, 255, 255))
 
         # prop
-        screen.blit(player, (pos['x'] * size, pos['y'] * size))
+        screen.blit(player, (pos[0] * size, pos[1] * size))
 
-        for box in prop[lvl]['boxes']:
-            pygame.draw.rect(disp, (000, 000, 000), [box['x'] * size, box['y'] * size, size, size])
+        for box in prop['boxes']:
+            pygame.draw.rect(disp, (000, 000, 000), [box[0] * size, box[1] * size, size, size])
 
-        for star in prop[lvl]['stars']:
-            pygame.draw.rect(disp, (255, 215, 000), [star['x'] * size, star['y'] * size, size, size])
+        for star in prop['stars']:
+            pygame.draw.rect(disp, (255, 215, 000), [star[0] * size, star[1] * size, size, size])
 
-        pygame.draw.rect(disp, (255, 000, 000), [prop[lvl]['goal']['x'] * size, prop[lvl]['goal']['y'] * size, size, size])
+        pygame.draw.rect(disp, (255, 000, 000), [prop['goal'][0] * size, prop['goal'][1] * size, size, size])
 
         # input
         for event in pygame.event.get():
@@ -230,138 +206,188 @@ def play():
                 del target_candidates[:]
 
                 if event.key == pygame.K_RIGHT:
-                    for box in prop[lvl]['boxes']:
-                        if box['y'] == pos['y']:
-                            target_candidates.append(box)
+                    find_target('right')
 
-                    if target_candidates[0] != None:
-                        target = target_candidates[0]
-                        rotate(90)
+                    rotate(90)
 
-                        if pos['y'] == target['y'] and pos['x'] < target['x']:
-                            pos['x'] = target['x'] - 1
+                    if pos[1] == target[1] and pos[0] < target[0]:
+                        v = 0
 
-                        else:
-                            pos['x'] = bounds[0] + 1
+                        while pos[0] < target[0] - 1:
+                            v += .0981
+
+                            if pos[0] < target[0] - 1 - v:
+                                pos[0] += v
+
+                                disp.fill((255, 255, 255))
+                                screen.blit(player, (pos[0] * size, pos[1] * size))
+
+                                pygame.display.update()
+
+                                time.sleep(.01)
+
+                            else:
+                                pos[0] = target[0] - 1
 
                     else:
-                        menu()
+                        pos[0] = bounds[0] + 1
 
                 if event.key == pygame.K_LEFT:
-                    for box in prop[lvl]['boxes']:
-                        if box['y'] == pos['y']:
-                            target_candidates.append(box)
+                    find_target('left')
 
-                    if target_candidates[0] != None:
-                        target = target_candidates[0]
-                        rotate(270)
+                    rotate(270)
 
-                        if pos['y'] == target['y'] and pos['x'] > target['x']:
-                            pos['x'] = target['x'] + 1
+                    if pos[1] == target[1] and pos[0] > target[0]:
+                        v = 0
 
-                        else:
-                            pos['x'] = -1
+                        while pos[0] > target[0] + 1:
+                            v += .0981
+
+                            if pos[0] > target[0] + 1 + v:
+                                pos[0] -= v
+
+                                disp.fill((255, 255, 255))
+                                screen.blit(player, (pos[0] * size, pos[1] * size))
+
+                                pygame.display.update()
+
+                                time.sleep(.01)
+
+                            else:
+                                pos[0] = target[0] + 1
 
                     else:
-                        menu()
+                        pos[0] = -1
 
                 if event.key == pygame.K_UP:
-                    for box in prop[lvl]['boxes']:
-                        if box['x'] == pos['x']:
-                            target_candidates.append(box)
+                    find_target('up')
 
-                    if target_candidates[0] != None:
-                        target = target_candidates[0]
-                        rotate(180)
+                    rotate(180)
 
-                        if pos['x'] == target['x'] and pos['y'] > target['y']:
-                            pos['y'] = target['y'] + 1
+                    if pos[0] == target[0] and pos[1] > target[1]:
+                        v = 0
 
-                        else:
-                            pos['y'] = bounds[0] - 1
+                        while pos[1] > target[1] + 1:
+                            v += .0981
+
+                            if pos[1] > target[1] + 1 + v:
+                                pos[1] -= v
+
+                                disp.fill((255, 255, 255))
+                                screen.blit(player, (pos[0] * size, pos[1] * size))
+
+                                pygame.display.update()
+
+                                time.sleep(.01)
+
+                            else:
+                                pos[1] = target[1] + 1
 
                     else:
-                        menu()
+                        pos[1] = -1
 
                 if event.key == pygame.K_DOWN:
-                    for box in prop[lvl]['boxes']:
-                        if box['x'] == pos['x']:
-                            target_candidates.append(box)
+                    find_target('down')
 
-                    if target_candidates[0] != None:
-                        target = target_candidates[0]
-                        rotate(0)
+                    rotate(0)
 
-                        if pos['x'] == target['x'] and pos['y'] < target['y']:
-                            pos['y'] = target['y'] - 1
+                    if pos[0] == target[0] and pos[1] < target[1]:
+                        v = 0
 
-                        else:
-                            pos['y'] = bounds[0] + 1
+                        while pos[1] < target[1] - 1:
+                            v += .0981
+
+                            if pos[1] < target[1] - 1 - v:
+                                pos[1] += v
+
+                                disp.fill((255, 255, 255))
+                                screen.blit(player, (pos[0] * size, pos[1] * size))
+
+                                pygame.display.update()
+
+                                time.sleep(.01)
+
+                            else:
+                                pos[1] = target[1] - 1
 
                     else:
-                        menu()
+                        pos[1] = bounds[1] + 1
 
                 if event.key == pygame.K_ESCAPE:
                     menu()
 
             # fail
-            if pos['x'] < 0 or pos['x'] > bounds[0] or pos['y'] < 0 or pos['y'] > bounds[1]:
+            if pos[0] < 0 or pos[0] > bounds[0] or pos[1] < 0 or pos[1] > bounds[1]:
+                end = True
                 success = False
                 menu()
 
             # success
-            if pos == prop[lvl]['goal']:
+            if pos == prop['goal']:
+                end = True
                 success = True
                 menu()
 
         pygame.display.update()
 
-success = False
-
 def menu():
-    global lvl, success
+    global lvl, success, prop, pos
 
     running = False
     show_menu = True
 
-    pygame.display.update()
-
     while show_menu:
         pygame.draw.rect(disp, (200, 200, 200), [size / 2, size / 2, bounds[0] - size, bounds[1] - size])
 
-        if success:
-            alert('Well done!', 60, [bounds[0] / 2 - get_txt_center('Well done!')[2] / 2, bounds[1] / 2], (255, 255, 255))
-            alert('Next level', 60, [bounds[0] / 2 - get_txt_center('Next level')[2] / 2, bounds[1] / 2 + 40], (255, 255, 255))
+        alert(str(lvl), 40, [40, 40], (255, 255, 255))
+        alert('r - Restart', 40, [40, bounds[1] - 105], (255, 255, 255))
+        alert('m - Menu', 40, [40, bounds[1] - 65], (255, 255, 255))
 
-            for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_RETURN:
-                        select_lvl(1)
+        if end:
+            if success:
+                alert('Well done!', 60, [bounds[0] / 2 - get_txt_center('Well done!')[2] / 2, bounds[1] / 2], (255, 255, 255))
+                alert('Next level', 60, [bounds[0] / 2 - get_txt_center('Next level')[2] / 2, bounds[1] / 2 + 40], (255, 255, 255))
 
-                        play()
+                for event in pygame.event.get():
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_RETURN:
+                            select_lvl(1)
 
-                pygame.display.update()
+                            module = importlib.import_module('lvl.%d' % lvl)
 
-        else:
-            alert('Fail :(', 60, [bounds[0] / 2 - get_txt_center('Well done!')[2] / 2, bounds[1] / 2], (255, 255, 255))
+                            prop = module.prop
+
+                            play('restart')
+
+                    if event.key == pygame.K_r:
+                        pos = prop['start']['pos'][:]
+                        rotate(0)
+
+                        play('restart')
+
+                    if event.key == pygame.K_m:
+                        splash()
+
+                    pygame.display.update()
+
+            else:
+                alert('Fail :(', 60, [bounds[0] / 2 - get_txt_center('Fail :(')[2] / 2, bounds[1] / 2], (255, 255, 255))
 
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    play()
+                    play('resume')
 
                 if event.key == pygame.K_r:
-                    pos = prop[lvl]['start']
+                    pos = prop['start']['pos'][:]
+                    rotate(0)
 
-                    play()
+                    play('restart')
 
                 if event.key == pygame.K_m:
                     splash()
 
             pygame.display.update()
-
-        alert('Menu', 40, [40, bounds[1] - 70], (255, 255, 255))
-        alert('Restart', 40, [40, bounds[1] - 110], (255, 255, 255))
 
 splash()
 
