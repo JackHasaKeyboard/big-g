@@ -1,6 +1,6 @@
 import pygame
 import time
-import os
+import glob
 
 # pygame fundamentals
 pygame.init()
@@ -80,11 +80,11 @@ while running:
                             prop[prop_type].remove(item)
 
             if event.key == pygame.K_w:
-                i = len(os.listdir('lvl'))
+                lvls = len(glob.glob('lvl/*.py')) + 1
 
-                f = open('lvl/%d.py' % i, 'a+')
+                f = open('lvl/%d.py' % lvls, 'a+')
 
-                f.write(str(prop))
+                f.write('prop = ' + str(prop))
 
                 f.close()
 
