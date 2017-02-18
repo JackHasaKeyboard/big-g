@@ -35,7 +35,10 @@ prop = {
             },
         'boxes': [],
         'stars': [],
-        'goal': [-1, -1]
+        'goal': [
+            -1, 
+            -1
+            ]
         }
 
 pos = prop['start']['pos'][:]
@@ -78,7 +81,7 @@ while running:
 
             # write
             if event.key == pygame.K_w:
-                lvls = len(re.findall('\d+\.py', str(glob.glob('lvl/*.py')))) + 1
+                lvls = len(re.findall('\d+\.py', str(glob.glob('lvl/*')))) + 1
 
                 f = open('lvl/%d.py' % lvls, 'a+')
 
