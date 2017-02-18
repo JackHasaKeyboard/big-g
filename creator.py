@@ -1,5 +1,6 @@
 import pygame
 import glob
+import re
 
 # pygame fundamentals
 pygame.init()
@@ -37,7 +38,7 @@ prop = {
         'goal': [-1, -1]
         }
 
-pos = prop['start']['pos']
+pos = prop['start']['pos'][:]
 
 running = True
 
@@ -77,7 +78,7 @@ while running:
 
             # write
             if event.key == pygame.K_w:
-                lvls = len(glob.glob('lvl/*.py')) + 1
+                lvls = len(re.findall('\d+\.py', str(glob.glob('lvl/*.py')))) + 1
 
                 f = open('lvl/%d.py' % lvls, 'a+')
 
