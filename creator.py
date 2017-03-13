@@ -2,6 +2,12 @@ import pygame
 import glob
 import re
 
+import importlib
+from glob import glob as glob
+import os
+
+import sys
+
 # pygame fundamentals
 pygame.init()
 
@@ -13,33 +19,47 @@ pygame.display.set_caption('Gravity Guy Level Creator')
 
 size = 50
 
-# bob
-player_img = pygame.image.load('img/aldrin.jpg')
-player = pygame.transform.scale(player_img, (size, size))
+# img
+img = {}
+
+for path in glob('img/*'):
+    rel = os.path.splitext(os.path.basename(path))[0]
+
+    img[str(rel)] = pygame.transform.scale(pygame.image.load(path), (size, size))
 
 # alert
-def alert(msg, size, pos, color):
+def alert(msg, font, size, pos, color):
     font = pygame.font.SysFont(None, size)
 
     cont = font.render(str(msg), True, color)
 
     disp.blit(cont, pos)
 
-prop = {
-        'start': {
-            'pos': [
-                -1,
-                -1
-                ],
-            'rot': 0
-            },
-        'boxes': [],
-        'stars': [],
-        'goal': [
-            -1, 
-            -1
-            ]
-        }
+# lvl
+if len(sys.argv) > 1:
+    lvl = int(sys.argv[1])
+
+    module = importlib.import_module('lvl.%d' % lvl)
+    prop = module.prop
+
+else:
+    lvl = len(re.findall('\d+\.py', str(glob('lvl/*'))))
+
+    prop = {
+            'start': {
+                'pos': [
+                    0,
+                    0
+                    ],
+                'rot': 0
+                },
+            'boxes': [],
+            'stars': [],
+            'goal': [
+                0, 
+                0
+                ]
+            }
 
 pos = prop['start']['pos'][:]
 
@@ -81,9 +101,7 @@ while running:
 
             # write
             if event.key == pygame.K_w:
-                lvls = len(re.findall('\d+\.py', str(glob.glob('lvl/*')))) + 1
-
-                f = open('lvl/%d.py' % lvls, 'a+')
+                f = open('lvl/%d.py' % lvl, 'w+')
 
                 f.write('prop = ' + str(prop))
 
@@ -91,23 +109,25 @@ while running:
 
         disp.fill((255, 255, 255))
 
+        alert(str(lvl), pygame.font.SysFont("AG Stencil", size), 160, [size, size], (225, 225, 225))
+
         for n in range(2):
             margin = [0, 0]
 
             for i in range(bounds[n] / size):
-                alert(i, 20, margin, (255, 000, 000))
+                alert(i, pygame.font.SysFont(None, size), 20, margin, (255, 000, 000))
 
                 margin[n] += 50
 
-        screen.blit(player, (prop['start']['pos'][0] * size, prop['start']['pos'][1] * size))
+        screen.blit(img['bob'], (prop['start']['pos'][0] * size, prop['start']['pos'][1] * size))
 
         for box in prop['boxes']:
-            pygame.draw.rect(disp, (000, 000, 000), [box[0] * size, box[1] * size, size, size])
+            screen.blit(img['box'], (box[0] * size, box[1] * size))
 
         for star in prop['stars']:
-            pygame.draw.rect(disp, (255, 215, 000), [star[0] * size, star[1] * size, size, size])
+            screen.blit(img['star'], (star[0] * size, star[1] * size))
 
-        pygame.draw.rect(disp, (255, 000, 000), [prop['goal'][0] * size, prop['goal'][1] * size, size, size])
+        screen.blit(img['goal'], (prop['goal'][0] * size, prop['goal'][1] * size))
 
         # cursor
         pygame.draw.rect(disp, (000, 000, 255), [pos[0] * size, pos[1] * size, 10, 10])
@@ -115,6 +135,6 @@ while running:
         pygame.draw.rect(disp, (000, 000, 255), [pos[0] * size, pos[1] * size + 40, 10, 10])
         pygame.draw.rect(disp, (000, 000, 255), [pos[0] * size + 40, pos[1] * size + 40, 10, 10])
 
-        alert(pos, 20, [pos[0] * 50, pos[1] * 50 + 10], (000, 000, 000))
+        alert(pos, pygame.font.SysFont(None, size), 20, [pos[0] * 50, pos[1] * 50 + 10], (000, 000, 000))
 
         pygame.display.update()
