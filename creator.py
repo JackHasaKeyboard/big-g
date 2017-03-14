@@ -63,7 +63,23 @@ else:
 
 pos = prop['start']['pos'][:]
 
+rot = 0
+
+def rotate(deg):
+    global img, rot
+
+    img['bob'] = pygame.transform.rotate(img['bob'], deg)
+
+    rot += deg
+    
+    if rot % 360 == 0:
+        rot = 0
+
+    prop['start']['rot'] += deg
+
 running = True
+
+rotate(prop['start']['rot'])
 
 while running:
     for event in pygame.event.get():
@@ -82,6 +98,11 @@ while running:
 
             if event.key == pygame.K_p:
                 prop['start']['pos'] = pos[:]
+
+            if event.key == pygame.K_r:
+                rotate(90)
+
+                prop['start']['rot'] = rot
 
             if event.key == pygame.K_b:
                 prop['boxes'].append(pos[:])
